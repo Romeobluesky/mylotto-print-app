@@ -180,7 +180,7 @@ export function SettingsView() {
         <div className="border-b px-4 py-2.5">
           <h1 className="text-[13px] font-semibold tracking-tight">인쇄 설정</h1>
           <p className="mt-0.5 text-[10px] text-muted-foreground">
-            OMR 6/45 · 190mm × 83mm
+            로또 6/45 마킹 용지
           </p>
         </div>
 
@@ -203,34 +203,35 @@ export function SettingsView() {
             </Select>
           </Section>
 
-          <Section title="마킹 치수 (0.1mm)">
+          <Section title="찍히는 점 크기">
             <div className="grid grid-cols-2 gap-2">
               <LabeledNumber
-                label="폭"
+                label="가로"
                 value={draft.markWidth}
                 onChange={(n) => patch({ markWidth: n })}
               />
               <LabeledNumber
-                label="높이"
+                label="세로"
                 value={draft.markHeight}
                 onChange={(n) => patch({ markHeight: n })}
               />
             </div>
             <p className="mt-1 text-[10px] text-muted-foreground">
-              {(draft.markWidth / 10).toFixed(1)}mm × {(draft.markHeight / 10).toFixed(1)}mm
+              현재 {(draft.markWidth / 10).toFixed(1)}mm × {(draft.markHeight / 10).toFixed(1)}mm
+              · 숫자 1 = 0.1mm. 너무 작으면 인식 안 되고, 너무 크면 옆 칸 침범.
             </p>
           </Section>
 
           <Section
-            title="게임별 오프셋 (0.1mm)"
+            title="각 게임 위치 조정"
             action={
               <button
                 type="button"
                 onClick={resetOffsets}
                 className="rounded-[4px] border bg-background px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-accent hover:text-foreground"
-                title="모든 게임의 X/Y 오프셋을 0 으로 초기화"
+                title="모든 게임의 위치 조정값을 0 으로 초기화"
               >
-                리셋
+                초기화
               </button>
             }
           >
@@ -250,18 +251,22 @@ export function SettingsView() {
                 />
               ))}
             </div>
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              한 게임 전체가 통째로 어긋났을 때 사용. 가로(X) · 세로(Y) 0.1mm 단위.
+              ‘+’ 는 오른쪽/아래, ‘−’ 는 왼쪽/위.
+            </p>
           </Section>
 
           <Section
-            title="셀 피치 보정 (0.1mm · 마지막 셀 시프트)"
+            title="각 게임 간격 미세 조정"
             action={
               <button
                 type="button"
                 onClick={resetPitch}
                 className="rounded-[4px] border bg-background px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-accent hover:text-foreground"
-                title="모든 게임의 피치 보정을 0 으로 초기화"
+                title="모든 게임의 간격 조정값을 0 으로 초기화"
               >
-                리셋
+                초기화
               </button>
             }
           >
@@ -282,13 +287,14 @@ export function SettingsView() {
               ))}
             </div>
             <p className="mt-1 text-[10px] text-muted-foreground">
-              X = col 7 시프트 · Y = row 7 시프트. 1/6 분배되어 셀 간격에 가산 — col 1·row 1 고정, 안쪽 셀은 비례 이동.
+              첫 번호(1)는 맞는데 끝 번호(7·43·45)로 갈수록 점점 어긋날 때 사용.
+              X 는 7번 열(가장 오른쪽), Y 는 7번 행(가장 아래)만 0.1mm 씩 이동, 중간 번호는 비례.
             </p>
           </Section>
 
-          <Section title="용지 가로 길이 (0.1mm)">
+          <Section title="용지 길이 (긴 쪽)">
             <div className="grid grid-cols-[28px_1fr] items-center gap-1.5">
-              <Label className="text-[11px] text-muted-foreground">H</Label>
+              <Label className="text-[11px] text-muted-foreground">길이</Label>
               <div className="flex items-center gap-0.5">
                 <button
                   type="button"
@@ -323,13 +329,14 @@ export function SettingsView() {
               </div>
             </div>
             <p className="mt-1 text-[10px] text-muted-foreground">
-              {(draft.paperHeight / 10).toFixed(1)}mm — 실측 OMR 용지 가로 길이로 보정 (다중 인쇄 시 누적 오차 차단)
+              현재 {(draft.paperHeight / 10).toFixed(1)}mm. 여러 장 연속 인쇄 시 위치가 점점
+              밀린다면 0.1mm 씩 조정 (보통 ±1~3 이면 충분).
             </p>
           </Section>
 
-          <Section title="왼쪽 여백 (0.1mm, ± 허용)">
+          <Section title="전체 마크 위치 보정 (공통)">
             <div className="grid grid-cols-[28px_1fr] items-center gap-1.5">
-              <Label className="text-[11px] text-muted-foreground">X</Label>
+              <Label className="text-[11px] text-muted-foreground">위치</Label>
               <div className="flex items-center gap-0.5">
                 <button
                   type="button"
@@ -363,11 +370,15 @@ export function SettingsView() {
                 </button>
               </div>
             </div>
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              5개 게임 전부 같은 방향으로 통째로 어긋났을 때 사용. ‘+’ 누르면 미리보기에서
+              오른쪽 (실제 종이 출력 시 위쪽), ‘−’ 누르면 반대.
+            </p>
           </Section>
 
-          <Section title="자동/반자동 체크박스 Y (0.1mm)">
+          <Section title="자동/반자동 표시 위치">
             <div className="grid grid-cols-[28px_1fr] items-center gap-1.5">
-              <Label className="text-[11px] text-muted-foreground">Y</Label>
+              <Label className="text-[11px] text-muted-foreground">세로</Label>
               <div className="flex items-center gap-0.5">
                 <button
                   type="button"
@@ -398,7 +409,7 @@ export function SettingsView() {
               </div>
             </div>
             <p className="mt-1 text-[10px] text-muted-foreground">
-              X 는 각 게임의 마지막 마킹 열에 자동 정렬 · Y 는 페이지 상단부터 절대 위치
+              각 게임 끝쪽의 ‘자동/반자동’ 칸 세로 위치. 가로는 자동 정렬되므로 손볼 필요 없음.
             </p>
           </Section>
         </div>
@@ -446,7 +457,7 @@ export function SettingsView() {
         <div className="mb-2 flex items-baseline justify-between">
           <h2 className="text-[12px] font-medium text-foreground">미리보기</h2>
           <span className="text-[10px] text-muted-foreground">
-            마우스를 사이드바 게임 위에 두면 해당 게임만 강조됩니다
+            왼쪽에서 게임 위에 마우스를 올리면 해당 게임만 진하게 표시됩니다
           </span>
         </div>
         <div
@@ -462,8 +473,8 @@ export function SettingsView() {
           <MarkOverlay settings={draft} focusGame={focusGame} />
         </div>
         <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
-          <span>좌표: 실측 스캔 best-fit (게임별)</span>
-          <span>셀 간격 가로 3.408~3.421mm · 세로 6.360~6.384mm</span>
+          <span>회색 점 = 실제 인쇄될 마크 위치</span>
+          <span>모든 칸이 표시됩니다 — 실제 인쇄는 선택된 번호만</span>
         </div>
 
         {/* 도움말 / 참고 — 미리보기 아래 공간 활용 */}
@@ -475,15 +486,43 @@ export function SettingsView() {
 
 function HelpPanel() {
   return (
-    <div className="mt-4">
-      <HelpCard title="다중 인쇄 시 위치가 어긋날 때" tone="warning">
+    <div className="mt-4 space-y-3">
+      <HelpCard title="처음 사용한다면" tone="default">
         <ol className="ml-3 list-decimal space-y-1 text-[11px] leading-relaxed">
-          <li>먼저 1장 시험 인쇄 — 위치가 맞는지 확인.</li>
-          <li>5장 연속 인쇄 — 5장째가 1장째와 같은 위치인지 확인.</li>
-          <li>밀린다면 <strong className="text-foreground">용지 가로 길이</strong>를 <span className="font-mono">+1</span>(0.1mm)씩 늘려봅니다.</li>
-          <li>위로 밀린다면 반대로 <span className="font-mono">−1</span>씩 줄여봅니다.</li>
-          <li>1~2회 시도로 0 오차 도달 — 한번 맞추면 영구 보존됩니다.</li>
+          <li>아래 <strong className="text-foreground">‘시험 인쇄’</strong> 를 눌러 1장 출력.</li>
+          <li>실제 OMR 용지에 검은 점이 셀(타원) 안에 정확히 들어갔는지 확인.</li>
+          <li>어긋났다면 아래 시나리오를 참고해 미세 조정 → 다시 시험 인쇄.</li>
+          <li>맞으면 <strong className="text-foreground">‘저장’</strong> — 이후 모든 인쇄에 자동 적용.</li>
         </ol>
+      </HelpCard>
+
+      <HelpCard title="자주 발생하는 문제 해결" tone="warning">
+        <dl className="space-y-2 text-[11px] leading-relaxed">
+          <div>
+            <dt className="font-semibold text-foreground">5개 게임 전부 같은 방향으로 어긋났다</dt>
+            <dd className="ml-1 text-muted-foreground">→ <strong>전체 마크 위치 보정</strong> 으로 한꺼번에 이동.</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-foreground">한 게임(예: D)만 어긋났다</dt>
+            <dd className="ml-1 text-muted-foreground">→ <strong>각 게임 위치 조정</strong> 의 해당 게임만 ±1 씩 조정.</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-foreground">1번은 맞는데 끝 번호(7·43·45)로 갈수록 어긋난다</dt>
+            <dd className="ml-1 text-muted-foreground">→ <strong>각 게임 간격 미세 조정</strong> 으로 끝 번호만 이동.</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-foreground">5장 연속 인쇄 시 5장째 위치가 점점 밀린다</dt>
+            <dd className="ml-1 text-muted-foreground">→ <strong>용지 길이</strong> 를 ±1 씩 조정 (보통 1~3 회로 해결).</dd>
+          </div>
+        </dl>
+      </HelpCard>
+
+      <HelpCard title="조정값 의미 한눈에" tone="default">
+        <ul className="ml-3 list-disc space-y-1 text-[11px] leading-relaxed">
+          <li>모든 숫자 입력의 단위는 <strong className="text-foreground">0.1mm</strong> (값 1 = 0.1mm).</li>
+          <li><strong>+</strong> = 오른쪽/아래로, <strong>−</strong> = 왼쪽/위로 (미리보기 기준).</li>
+          <li>두꺼운 종이 뭉치(30장 이상)는 픽업이 흔들려 위치가 들쭉날쭉할 수 있음 — 10~15장씩 나눠 인쇄 권장.</li>
+        </ul>
       </HelpCard>
     </div>
   );
