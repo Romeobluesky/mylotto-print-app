@@ -1,0 +1,52 @@
+{
+  "name": "winspot-omr-marker",
+  "version": "1.0.0",
+  "description": "Korean Lotto 6/45 OMR auto-marker & printer (Windows)",
+  "main": "out/main/main.js",
+  "author": "WinSpot",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/run.mjs electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "node scripts/run.mjs electron-vite preview",
+    "start": "node scripts/run.mjs electron-vite preview",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "dist": "npm run build && electron-builder --win --x64",
+    "dist:dir": "npm run build && electron-builder --win --x64 --dir"
+  },
+  "dependencies": {
+    "@radix-ui/react-checkbox": "^1.1.1",
+    "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-scroll-area": "^1.1.0",
+    "@radix-ui/react-select": "^2.1.1",
+    "@radix-ui/react-separator": "^1.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "electron-store": "8.2.0",
+    "lucide-react": "^0.408.0",
+    "tailwind-merge": "^2.4.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^2.3.0",
+    "pngjs": "^7.0.0",
+    "postcss": "^8.4.40",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.7",
+    "typescript": "^5.4.5",
+    "vite": "^5.3.5"
+  }
+}

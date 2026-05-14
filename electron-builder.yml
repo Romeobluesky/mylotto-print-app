@@ -1,0 +1,32 @@
+appId: com.winspot.omr-marker
+productName: WinSpot OMR Marker
+copyright: Copyright (c) 2026 WinSpot
+asar: true
+directories:
+  output: release
+  buildResources: resources
+files:
+  - out/**/*
+  - package.json
+  - "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}"
+  - "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}"
+extraResources:
+  - from: resources/
+    to: .
+    filter:
+      - "**/*"
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.ico
+  artifactName: ${productName}-Setup-${version}.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: WinSpot OMR Marker
+  uninstallDisplayName: ${productName}
