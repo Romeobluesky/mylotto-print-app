@@ -121,6 +121,21 @@ npm install
 | `npm run dist:dir` | `release/win-unpacked/` 에 압축 풀린 폴더 — 빠른 테스트용 |
 | `npm run typecheck` | TS 타입체크 (web + node) |
 
+### 빌드 산출물
+
+`npm run dist` 실행 후 `release/` 폴더에 다음 파일들이 생성됩니다 (버전은
+[`package.json`](package.json) `version` 기준).
+
+| 경로 | 용도 |
+|------|------|
+| `release/WinSpot OMR Marker-Setup-{version}.exe` | NSIS 설치파일 — 사용자 배포용 (≈ 80MB) |
+| `release/WinSpot OMR Marker-Setup-{version}.exe.blockmap` | electron-updater 차등 업데이트용 블록맵 |
+| `release/latest.yml` | electron-updater 매니페스트 (자동 업데이트 메타데이터) |
+| `release/win-unpacked/` | 압축 해제된 앱 폴더 — 설치 없이 바로 실행 / 디버그용 |
+
+`release/win-unpacked/WinSpot OMR Marker.exe` 를 직접 실행하면 설치 없이
+앱을 띄울 수 있어 빠른 동작 검증에 유용합니다.
+
 ### 좌표 재측정
 
 OMR 카드 이미지를 새로 스캔했거나 실측 좌표를 검증하고 싶을 때:
