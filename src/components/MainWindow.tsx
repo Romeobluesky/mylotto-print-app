@@ -14,7 +14,9 @@ import { useCombinations } from '@/hooks/useCombinations';
 import { useSettings } from '@/hooks/useSettings';
 import { ipc } from '@/ipc/client';
 
-type ConfirmKind = 'selected' | 'all';
+type ConfirmKind = 'selected' | 'all' | 'exit';
+
+const APP_NAME = 'WinSpot OMR Marker';
 
 export function MainWindow() {
   const {
@@ -74,7 +76,7 @@ export function MainWindow() {
     else clearSelection();
   }
 
-  function handleConfirmDelete() {
+  function handleConfirm() {
     if (confirmKind === 'selected') {
       const n = selectedIds.size;
       removeSelected();
@@ -83,12 +85,15 @@ export function MainWindow() {
       const n = items.length;
       removeAll();
       setStatus(`전체 ${n}건 삭제`);
+    } else if (confirmKind === 'exit') {
+      window.close();
+      return;
     }
     setConfirmKind(null);
   }
 
   function handleExit() {
-    window.close();
+    setConfirmKind('exit');
   }
 
   async function handleOpenSettings() {
@@ -155,19 +160,21 @@ export function MainWindow() {
       <Dialog open={confirmKind !== null} onOpenChange={(o) => !o && setConfirmKind(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>삭제 확인</DialogTitle>
+            <DialogTitle>
+              {confirmKind === 'exit' ? '종료 확인' : '삭제 확인'}
+            </DialogTitle>
             <DialogDescription>
-              {confirmKind === 'selected'
-                ? '선택한 조합을 삭제 하시겠습니까?'
-                : '전체 조합을 삭제 하시겠습니까?'}
+              {confirmKind === 'selected' && '선택한 조합을 삭제 하시겠습니까?'}
+              {confirmKind === 'all' && '전체 조합을 삭제 하시겠습니까?'}
+              {confirmKind === 'exit' && `${APP_NAME}를 종료하시겠습니까?`}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" size="sm" onClick={() => setConfirmKind(null)}>
               취소
             </Button>
-            <Button variant="destructive" size="sm" onClick={handleConfirmDelete}>
-              삭제
+            <Button variant="destructive" size="sm" onClick={handleConfirm}>
+              {confirmKind === 'exit' ? '종료' : '삭제'}
             </Button>
           </DialogFooter>
         </DialogContent>
