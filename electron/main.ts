@@ -7,6 +7,7 @@ import { getAllSettings, setAllSettings } from './services/store';
 
 let mainWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
+let manualInputWindow: BrowserWindow | null = null;
 
 const PRELOAD_PATH = join(__dirname, '../preload/preload.js');
 const RENDERER_INDEX = join(__dirname, '../renderer/index.html');
@@ -16,7 +17,7 @@ const ICON_PATH = app.isPackaged
   ? join(process.resourcesPath, 'icon.ico')
   : join(__dirname, '../../resources/icon.ico');
 
-function loadRenderer(win: BrowserWindow, route: 'main' | 'settings') {
+function loadRenderer(win: BrowserWindow, route: 'main' | 'settings' | 'manual-input') {
   const devUrl = process.env.ELECTRON_RENDERER_URL;
   if (devUrl) {
     win.loadURL(`${devUrl}#/${route}`);
@@ -103,6 +104,47 @@ function createSettingsWindow() {
   });
 }
 
+function createManualInputWindow() {
+  if (manualInputWindow && !manualInputWindow.isDestroyed()) {
+    manualInputWindow.focus();
+    return;
+  }
+
+  manualInputWindow = new BrowserWindow({
+    width: 560,
+    height: 480,
+    minWidth: 560,
+    maxWidth: 560,
+    minHeight: 480,
+    maxHeight: 480,
+    maximizable: false,
+    fullscreenable: false,
+    parent: mainWindow ?? undefined,
+    modal: false,
+    title: 'WinSpot OMR Marker — 수동입력',
+    icon: ICON_PATH,
+    autoHideMenuBar: true,
+    backgroundColor: '#ffffff',
+    show: false,
+    webPreferences: {
+      preload: PRELOAD_PATH,
+      contextIsolation: true,
+      sandbox: true,
+    },
+  });
+
+  manualInputWindow.setMenuBarVisibility(false);
+  loadRenderer(manualInputWindow, 'manual-input');
+
+  manualInputWindow.once('ready-to-show', () => {
+    manualInputWindow?.show();
+  });
+
+  manualInputWindow.on('closed', () => {
+    manualInputWindow = null;
+  });
+}
+
 function broadcastSettingsChanged(settings: AppSettings) {
   for (const win of BrowserWindow.getAllWindows()) {
     if (!win.isDestroyed()) {
@@ -155,6 +197,22 @@ function registerIpc() {
   ipcMain.handle('settings:close', async () => {
     if (settingsWindow && !settingsWindow.isDestroyed()) {
       settingsWindow.close();
+    }
+  });
+
+  ipcMain.handle('manual-input:open', async () => {
+    createManualInputWindow();
+  });
+
+  ipcMain.handle('manual-input:close', async () => {
+    if (manualInputWindow && !manualInputWindow.isDestroyed()) {
+      manualInputWindow.close();
+    }
+  });
+
+  ipcMain.handle('manual-input:submit', async (_event, groups: number[][]) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('manual-input:submitted', groups);
     }
   });
 }

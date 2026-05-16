@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
 import { MainWindow } from './components/MainWindow';
 import { SettingsView } from './components/SettingsView';
+import { ManualInputView } from './components/ManualInputView';
 
-function getRoute(): 'main' | 'settings' {
+type Route = 'main' | 'settings' | 'manual-input';
+
+function getRoute(): Route {
   const hash = window.location.hash.replace(/^#/, '');
-  return hash === '/settings' ? 'settings' : 'main';
+  if (hash === '/settings') return 'settings';
+  if (hash === '/manual-input') return 'manual-input';
+  return 'main';
 }
 
 export default function App() {
-  const [route, setRoute] = useState<'main' | 'settings'>(() => getRoute());
+  const [route, setRoute] = useState<Route>(() => getRoute());
 
   useEffect(() => {
     const onHash = () => setRoute(getRoute());
@@ -16,5 +21,7 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
-  return route === 'settings' ? <SettingsView /> : <MainWindow />;
+  if (route === 'settings') return <SettingsView />;
+  if (route === 'manual-input') return <ManualInputView />;
+  return <MainWindow />;
 }

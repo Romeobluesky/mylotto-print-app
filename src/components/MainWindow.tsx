@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ButtonPanel } from './ButtonPanel';
 import { CombinationList } from './CombinationList';
 import { useCombinations } from '@/hooks/useCombinations';
@@ -6,12 +6,29 @@ import { useSettings } from '@/hooks/useSettings';
 import { ipc } from '@/ipc/client';
 
 export function MainWindow() {
-  const { items, selectedIds, numbersOnly, replaceAll, toggle, removeSelected, removeAll } =
-    useCombinations();
+  const {
+    items,
+    selectedIds,
+    numbersOnly,
+    replaceAll,
+    prependManual,
+    toggle,
+    removeSelected,
+    removeAll,
+  } = useCombinations();
   const { settings, loaded } = useSettings();
   const [printing, setPrinting] = useState(false);
   const [status, setStatus] = useState<string>('준비됨');
   const [fileName, setFileName] = useState<string>('');
+
+  useEffect(() => {
+    const off = ipc.onManualInputSubmit((groups) => {
+      if (!groups || groups.length === 0) return;
+      prependManual(groups);
+      setStatus(`수동 입력 ${groups.length}건 추가`);
+    });
+    return off;
+  }, [prependManual]);
 
   async function handleOpenFile() {
     const res = await ipc.openFile();
@@ -45,6 +62,10 @@ export function MainWindow() {
     await ipc.openSettingsWindow();
   }
 
+  async function handleOpenManualInput() {
+    await ipc.openManualInputWindow();
+  }
+
   if (!loaded) {
     return (
       <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
@@ -76,6 +97,7 @@ export function MainWindow() {
         </div>
         <ButtonPanel
           onOpenFile={handleOpenFile}
+          onOpenManualInput={handleOpenManualInput}
           onOpenSettings={handleOpenSettings}
           onPrint={handlePrint}
           onDeleteSelected={removeSelected}

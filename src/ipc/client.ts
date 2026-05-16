@@ -26,4 +26,9 @@ export const ipc = {
   closeSettingsWindow: (): Promise<void> => bridge().closeSettingsWindow(),
   onSettingsChanged: (cb: (settings: AppSettings) => void): (() => void) =>
     bridge().onSettingsChanged(cb),
+  openManualInputWindow: (): Promise<void> => bridge().openManualInputWindow(),
+  closeManualInputWindow: (): Promise<void> => bridge().closeManualInputWindow(),
+  submitManualInput: (groups: number[][]): Promise<void> => bridge().submitManualInput(groups),
+  onManualInputSubmit: (cb: (groups: number[][]) => void): (() => void) =>
+    bridge().onManualInputSubmit(cb),
 };

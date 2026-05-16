@@ -28,6 +28,17 @@ const api: ApiBridge = {
       ipcRenderer.removeListener('settings:changed', handler);
     };
   },
+  openManualInputWindow: () => ipcRenderer.invoke('manual-input:open') as Promise<void>,
+  closeManualInputWindow: () => ipcRenderer.invoke('manual-input:close') as Promise<void>,
+  submitManualInput: (groups: number[][]) =>
+    ipcRenderer.invoke('manual-input:submit', groups) as Promise<void>,
+  onManualInputSubmit: (callback: (groups: number[][]) => void) => {
+    const handler = (_event: IpcRendererEvent, groups: number[][]) => callback(groups);
+    ipcRenderer.on('manual-input:submitted', handler);
+    return () => {
+      ipcRenderer.removeListener('manual-input:submitted', handler);
+    };
+  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

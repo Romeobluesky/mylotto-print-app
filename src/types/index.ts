@@ -99,6 +99,10 @@ export interface ApiBridge {
   openSettingsWindow: () => Promise<void>;
   closeSettingsWindow: () => Promise<void>;
   onSettingsChanged: (callback: (settings: AppSettings) => void) => () => void;
+  openManualInputWindow: () => Promise<void>;
+  closeManualInputWindow: () => Promise<void>;
+  submitManualInput: (groups: number[][]) => Promise<void>;
+  onManualInputSubmit: (callback: (groups: number[][]) => void) => () => void;
 }
 
 declare global {

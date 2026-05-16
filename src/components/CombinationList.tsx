@@ -47,6 +47,11 @@ export function CombinationList({ items, selectedIds, onToggle }: Props) {
                   <span className="font-mono text-foreground tabular-nums tracking-wider">
                     {formatNumbers(it.numbers)}
                   </span>
+                  {it.source === 'manual' && (
+                    <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">
+                      [수동입력]
+                    </span>
+                  )}
                 </li>
               );
             })}

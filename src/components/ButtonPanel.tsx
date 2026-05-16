@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface Props {
   onOpenFile: () => void;
+  onOpenManualInput: () => void;
   onOpenSettings: () => void;
   onPrint: () => void;
   onDeleteSelected: () => void;
@@ -17,6 +18,7 @@ const baseBtn = 'h-8 w-full justify-center text-xs font-medium px-2';
 
 export function ButtonPanel({
   onOpenFile,
+  onOpenManualInput,
   onOpenSettings,
   onPrint,
   onDeleteSelected,
@@ -30,6 +32,9 @@ export function ButtonPanel({
     <div className="flex w-28 shrink-0 flex-col gap-1.5">
       <Button variant="default" size="sm" onClick={onOpenFile} className={cn(baseBtn)}>
         파일 열기
+      </Button>
+      <Button variant="default" size="sm" onClick={onOpenManualInput} className={cn(baseBtn)}>
+        수동입력
       </Button>
       <Button
         variant="default"

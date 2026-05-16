@@ -1,8 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
 
+export type CombinationSource = 'file' | 'manual';
+
 export interface CombinationItem {
   id: string;
   numbers: number[];
+  source: CombinationSource;
 }
 
 let _seq = 0;
@@ -13,12 +16,22 @@ export function useCombinations() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const addMany = useCallback((groups: number[][]) => {
-    setItems((prev) => [...prev, ...groups.map((numbers) => ({ id: nextId(), numbers }))]);
+    setItems((prev) => [
+      ...prev,
+      ...groups.map((numbers) => ({ id: nextId(), numbers, source: 'file' as const })),
+    ]);
   }, []);
 
   const replaceAll = useCallback((groups: number[][]) => {
-    setItems(groups.map((numbers) => ({ id: nextId(), numbers })));
+    setItems(groups.map((numbers) => ({ id: nextId(), numbers, source: 'file' as const })));
     setSelectedIds(new Set());
+  }, []);
+
+  const prependManual = useCallback((groups: number[][]) => {
+    setItems((prev) => [
+      ...groups.map((numbers) => ({ id: nextId(), numbers, source: 'manual' as const })),
+      ...prev,
+    ]);
   }, []);
 
   const toggle = useCallback((id: string) => {
@@ -48,6 +61,7 @@ export function useCombinations() {
     numbersOnly,
     addMany,
     replaceAll,
+    prependManual,
     toggle,
     removeSelected,
     removeAll,
