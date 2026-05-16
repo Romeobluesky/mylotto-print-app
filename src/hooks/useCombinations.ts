@@ -53,16 +53,33 @@ export function useCombinations() {
     setSelectedIds(new Set());
   }, []);
 
+  const selectAll = useCallback(() => {
+    setSelectedIds(new Set(items.map((it) => it.id)));
+  }, [items]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
   const numbersOnly = useMemo(() => items.map((it) => it.numbers), [items]);
+  const selectedNumbers = useMemo(
+    () => items.filter((it) => selectedIds.has(it.id)).map((it) => it.numbers),
+    [items, selectedIds],
+  );
+  const allSelected = items.length > 0 && selectedIds.size === items.length;
 
   return {
     items,
     selectedIds,
     numbersOnly,
+    selectedNumbers,
+    allSelected,
     addMany,
     replaceAll,
     prependManual,
     toggle,
+    selectAll,
+    clearSelection,
     removeSelected,
     removeAll,
   };

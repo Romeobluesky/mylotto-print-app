@@ -1,18 +1,32 @@
 import { useEffect, useState } from 'react';
 import { ButtonPanel } from './ButtonPanel';
 import { CombinationList } from './CombinationList';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useCombinations } from '@/hooks/useCombinations';
 import { useSettings } from '@/hooks/useSettings';
 import { ipc } from '@/ipc/client';
+
+type ConfirmKind = 'selected' | 'all';
 
 export function MainWindow() {
   const {
     items,
     selectedIds,
-    numbersOnly,
+    selectedNumbers,
+    allSelected,
     replaceAll,
     prependManual,
     toggle,
+    selectAll,
+    clearSelection,
     removeSelected,
     removeAll,
   } = useCombinations();
@@ -20,6 +34,7 @@ export function MainWindow() {
   const [printing, setPrinting] = useState(false);
   const [status, setStatus] = useState<string>('준비됨');
   const [fileName, setFileName] = useState<string>('');
+  const [confirmKind, setConfirmKind] = useState<ConfirmKind | null>(null);
 
   useEffect(() => {
     const off = ipc.onManualInputSubmit((groups) => {
@@ -42,16 +57,34 @@ export function MainWindow() {
     );
   }
 
-  async function handlePrint() {
-    if (numbersOnly.length === 0) return;
+  async function handlePrintSelected() {
+    if (selectedNumbers.length === 0) return;
     setPrinting(true);
-    setStatus('인쇄 작업 전송 중...');
+    setStatus(`선택 ${selectedNumbers.length}건 인쇄 작업 전송 중...`);
     try {
-      const res = await ipc.print({ combinations: numbersOnly, settings });
+      const res = await ipc.print({ combinations: selectedNumbers, settings });
       setStatus(res.success ? '인쇄 작업 전송 완료' : `인쇄 실패: ${res.error}`);
     } finally {
       setPrinting(false);
     }
+  }
+
+  function handleToggleSelectAll(checked: boolean) {
+    if (checked) selectAll();
+    else clearSelection();
+  }
+
+  function handleConfirmDelete() {
+    if (confirmKind === 'selected') {
+      const n = selectedIds.size;
+      removeSelected();
+      setStatus(`선택 ${n}건 삭제`);
+    } else if (confirmKind === 'all') {
+      const n = items.length;
+      removeAll();
+      setStatus(`전체 ${n}건 삭제`);
+    }
+    setConfirmKind(null);
   }
 
   function handleExit() {
@@ -99,12 +132,14 @@ export function MainWindow() {
           onOpenFile={handleOpenFile}
           onOpenManualInput={handleOpenManualInput}
           onOpenSettings={handleOpenSettings}
-          onPrint={handlePrint}
-          onDeleteSelected={removeSelected}
-          onDeleteAll={removeAll}
+          onPrintSelected={handlePrintSelected}
+          onToggleSelectAll={handleToggleSelectAll}
+          onDeleteSelected={() => setConfirmKind('selected')}
+          onDeleteAll={() => setConfirmKind('all')}
           onExit={handleExit}
           hasItems={items.length > 0}
           hasSelection={selectedIds.size > 0}
+          allSelected={allSelected}
           isPrinting={printing}
         />
       </div>
@@ -116,6 +151,27 @@ export function MainWindow() {
           {settings.printer || '프린터 미설정'}
         </span>
       </footer>
+
+      <Dialog open={confirmKind !== null} onOpenChange={(o) => !o && setConfirmKind(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>삭제 확인</DialogTitle>
+            <DialogDescription>
+              {confirmKind === 'selected'
+                ? '선택한 조합을 삭제 하시겠습니까?'
+                : '전체 조합을 삭제 하시겠습니까?'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setConfirmKind(null)}>
+              취소
+            </Button>
+            <Button variant="destructive" size="sm" onClick={handleConfirmDelete}>
+              삭제
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
