@@ -27,6 +27,7 @@ export function MainWindow() {
     replaceAll,
     prependManual,
     toggle,
+    setSelected,
     selectAll,
     clearSelection,
     removeSelected,
@@ -131,7 +132,12 @@ export function MainWindow() {
       {/* 본문: 리스트 + 버튼 패널 */}
       <div className="flex min-h-0 flex-1 gap-2">
         <div className="min-w-0 flex-1">
-          <CombinationList items={items} selectedIds={selectedIds} onToggle={toggle} />
+          <CombinationList
+            items={items}
+            selectedIds={selectedIds}
+            onToggle={toggle}
+            onSetSelected={setSelected}
+          />
         </div>
         <ButtonPanel
           onOpenFile={handleOpenFile}

@@ -8,6 +8,7 @@ interface Props {
   items: CombinationItem[];
   selectedIds: Set<string>;
   onToggle: (id: string) => void;
+  onSetSelected: (ids: string[], checked: boolean) => void;
 }
 
 const GROUP_SIZE = 5;
@@ -87,20 +88,22 @@ function Badge({ label, isHighlighted, onClick }: BadgeProps) {
   );
 }
 
-export function CombinationList({ items, selectedIds, onToggle }: Props) {
+export function CombinationList({ items, selectedIds, onToggle, onSetSelected }: Props) {
   const [highlighted, setHighlighted] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setHighlighted(new Set());
   }, [items]);
 
-  const toggleHighlight = (key: string) => {
+  const toggleHighlight = (key: string, groupIds: string[]) => {
+    const willHighlight = !highlighted.has(key);
     setHighlighted((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
+      if (willHighlight) next.add(key);
+      else next.delete(key);
       return next;
     });
+    onSetSelected(groupIds, willHighlight);
   };
 
   const manualItems = items.filter((it) => it.source === 'manual');
@@ -134,7 +137,12 @@ export function CombinationList({ items, selectedIds, onToggle }: Props) {
                 <Badge
                   label="M"
                   isHighlighted={highlighted.has(MANUAL_KEY)}
-                  onClick={() => toggleHighlight(MANUAL_KEY)}
+                  onClick={() =>
+                    toggleHighlight(
+                      MANUAL_KEY,
+                      manualItems.map((it) => it.id),
+                    )
+                  }
                 />
               </li>
             )}
@@ -162,7 +170,12 @@ export function CombinationList({ items, selectedIds, onToggle }: Props) {
                   <Badge
                     label={groupNum.toString()}
                     isHighlighted={isHighlighted}
-                    onClick={() => toggleHighlight(key)}
+                    onClick={() =>
+                      toggleHighlight(
+                        key,
+                        group.map((it) => it.id),
+                      )
+                    }
                   />
                 </li>
               );

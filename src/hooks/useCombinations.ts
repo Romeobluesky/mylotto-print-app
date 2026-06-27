@@ -43,6 +43,17 @@ export function useCombinations() {
     });
   }, []);
 
+  const setSelected = useCallback((ids: string[], checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) {
+        if (checked) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  }, []);
+
   const removeSelected = useCallback(() => {
     setItems((prev) => prev.filter((it) => !selectedIds.has(it.id)));
     setSelectedIds(new Set());
@@ -78,6 +89,7 @@ export function useCombinations() {
     replaceAll,
     prependManual,
     toggle,
+    setSelected,
     selectAll,
     clearSelection,
     removeSelected,
