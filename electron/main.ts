@@ -11,6 +11,7 @@ let manualInputWindow: BrowserWindow | null = null;
 
 const PRELOAD_PATH = join(__dirname, '../preload/preload.js');
 const RENDERER_INDEX = join(__dirname, '../renderer/index.html');
+const APP_TITLE = `WinSpot OMR Marker v${app.getVersion()}`;
 // dev: 프로젝트 루트의 resources/icon.ico (__dirname = out/main/)
 // packaged: electron-builder `extraResources`로 app.asar 옆 resources/ 디렉토리에 위치
 const ICON_PATH = app.isPackaged
@@ -36,7 +37,7 @@ function createMainWindow() {
     maxHeight: 640,
     maximizable: false,
     fullscreenable: false,
-    title: 'WinSpot OMR Marker',
+    title: APP_TITLE,
     icon: ICON_PATH,
     autoHideMenuBar: true,
     backgroundColor: '#ffffff',
@@ -48,6 +49,11 @@ function createMainWindow() {
   });
 
   mainWindow.setMenuBarVisibility(false);
+  // 렌더러의 <title>이 윈도우 제목을 덮어쓰지 않도록 막고 버전 포함 제목을 유지.
+  mainWindow.webContents.on('page-title-updated', (e) => {
+    e.preventDefault();
+    mainWindow?.setTitle(APP_TITLE);
+  });
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
